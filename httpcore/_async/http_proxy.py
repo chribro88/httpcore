@@ -262,6 +262,7 @@ class AsyncTunnelHTTPConnection(AsyncConnectionInterface):
         self._http2 = http2
         self._connect_lock = AsyncLock()
         self._connected = False
+        self._connect_response: Response = None
 
     async def handle_async_request(self, request: Request) -> Response:
         timeouts = request.extensions.get("timeout", {})
@@ -289,6 +290,8 @@ class AsyncTunnelHTTPConnection(AsyncConnectionInterface):
                 connect_response = await self._connection.handle_async_request(
                     connect_request
                 )
+
+                self._connect_response = connect_response
 
                 if connect_response.status < 200 or connect_response.status > 299:
                     reason_bytes = connect_response.extensions.get("reason_phrase", b"")
