@@ -262,6 +262,7 @@ class TunnelHTTPConnection(ConnectionInterface):
         self._http2 = http2
         self._connect_lock = Lock()
         self._connected = False
+        self._connect_response: Response = None
 
     def handle_request(self, request: Request) -> Response:
         timeouts = request.extensions.get("timeout", {})
@@ -289,6 +290,8 @@ class TunnelHTTPConnection(ConnectionInterface):
                 connect_response = self._connection.handle_request(
                     connect_request
                 )
+
+                self._connect_response = connect_response
 
                 if connect_response.status < 200 or connect_response.status > 299:
                     reason_bytes = connect_response.extensions.get("reason_phrase", b"")
